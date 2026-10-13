@@ -33,6 +33,9 @@ pipeline {
                 deleteDir()
                 checkout scm // Usa a URL, a branch e a credencial GitHub configuradas no job.
                 script {
+                    // Exporta explicitamente o parametro, inclusive no primeiro build.
+                    // A verificacao de null preserva false quando os testes forem habilitados.
+                    env.SKIP_TESTS = (params.SKIP_TESTS == null ? true : params.SKIP_TESTS).toString()
                     // Fora do contexto Docker; biblioteca e servico usam este mesmo repositorio Maven.
                     env.MAVEN_REPO = "${pwd(tmp: true)}/maven-repository"
                     env.AUTH_SOURCE_DIR = "${pwd(tmp: true)}/auth-source"
@@ -64,9 +67,9 @@ pipeline {
                         set -eu
                         test -f pom.xml || { echo 'O repositorio auth precisa ser uma biblioteca Maven.' >&2; exit 1; }
                         if [ -f ./mvnw ]; then
-                            sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean install
+                            sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean install
                         else
-                            mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean install
+                            mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean install
                         fi
                     '''
                 }
@@ -78,9 +81,9 @@ pipeline {
                 sh '''
                     set -eu
                     if [ -f ./mvnw ]; then
-                        sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean package
+                        sh ./mvnw -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean package
                     else
-                        mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=$SKIP_TESTS" clean package
+                        mvn -B "-Dmaven.repo.local=$MAVEN_REPO" "-DskipTests=${SKIP_TESTS:-true}" clean package
                     fi
                 '''
             }
