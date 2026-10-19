@@ -37,3 +37,10 @@ logging:
     root: info
     store: debug
     org.springframework.web: debug
+
+management:
+  endpoints:
+    web:
+      base-path: /auth/actuator
+      exposure:
+        include: ['prometheus']
