@@ -13,11 +13,14 @@ spec:
         app: gateway
     spec:
       containers:
-          - name: gateway
-            image: weirdessen/gateway:latest
-            imagePullPolicy: Always
-            ports:
-              - containerPort: 8080
+        - name: gateway
+          image: weirdessen/gateway:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: gateway-env
 
 ---
 
